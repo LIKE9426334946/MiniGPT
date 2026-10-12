@@ -7,8 +7,8 @@ model:
   activation: relu
   max_seq_len: 32
 data:
-  corpus_path: corpus/train_1000.txt
-  val_ratio: 0.1
+  train_path: corpus/train_5000.txt
+  val_path: corpus/val_1000.txt
 train:
   batch_size: 16
   seed: 23

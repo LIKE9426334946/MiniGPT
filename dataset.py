@@ -2,7 +2,7 @@ from pathlib import Path
 
 import torch
 import yaml
-from torch.utils.data import DataLoader, Dataset, random_split
+from torch.utils.data import DataLoader, Dataset
 
 from vocab import id_to_token, token_to_id
 
@@ -71,27 +71,16 @@ def create_dataloaders(config_path=None):
     if config["model"]["vocab_size"] != len(token_to_id):
         raise ValueError("config.yaml 中的 vocab_size 与词表大小不一致")
 
-    # 语料的相对路径以 config.yaml 所在目录为起点。
-    corpus_path = config_path.parent / config["data"]["corpus_path"]
-    dataset = TextDataset(corpus_path, config["model"]["max_seq_len"])
+    # 训练和验证分别读取各自的文件；相对路径以 config.yaml 所在目录为起点。
+    train_path = (config_path.parent / config["data"]["train_path"]).resolve()
+    val_path = (config_path.parent / config["data"]["val_path"]).resolve()
+    if train_path == val_path:
+        raise ValueError("训练集和验证集必须使用不同的语料文件")
 
-    val_ratio = config["data"]["val_ratio"]
-    if not 0 < val_ratio < 1:
-        raise ValueError("val_ratio 必须在 0 和 1 之间")
-
-    val_size = int(len(dataset) * val_ratio)
-    train_size = len(dataset) - val_size
-    if min(train_size, val_size) < 1:
-        raise ValueError("训练集和验证集都至少需要一条文本")
-
+    max_seq_len = config["model"]["max_seq_len"]
+    train_set = TextDataset(train_path, max_seq_len)
+    val_set = TextDataset(val_path, max_seq_len)
     seed = config["train"]["seed"]
-
-    # 固定划分：重新运行时，同一份语料得到相同的训练/验证划分。
-    train_set, val_set = random_split(
-        dataset,
-        [train_size, val_size],
-        generator=torch.Generator().manual_seed(seed),
-    )
 
     loader_args = {
         "batch_size": config["train"]["batch_size"],

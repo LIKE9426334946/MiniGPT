@@ -152,8 +152,11 @@ def main(config_path):
                 "optimizer_state_dict": optimizer.state_dict(),
                 "config": config,
                 "vocab": list(tokens),
-                "train_indices": list(train_loader.dataset.indices),
-                "val_indices": list(val_loader.dataset.indices),
+                # 使用独立语料文件后，Dataset 不再具有 random_split 的 indices。
+                "train_path": config["data"]["train_path"],
+                "val_path": config["data"]["val_path"],
+                "train_size": len(train_loader.dataset),
+                "val_size": len(val_loader.dataset),
                 "best_val_loss": best_val_loss,
                 **row,
             }
@@ -186,3 +189,4 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
     main(args.config)
+
