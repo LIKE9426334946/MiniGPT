@@ -1,0 +1,21 @@
+model:
+  vocab_size: 100
+  d_model: 64
+  num_layers: 6
+  num_heads: 4
+  dim_feedforward: 192
+  activation: relu
+  max_seq_len: 32
+data:
+  corpus_path: corpus/train_1000.txt
+  val_ratio: 0.1
+train:
+  batch_size: 16
+  seed: 23
+  num_workers: 0
+  epochs: 100
+  learning_rate: 0.001
+  weight_decay: 0.01
+  grad_clip: 1.0 # 梯度范围超过此值时缩放
+  device: auto
+  output_dir: outputs
